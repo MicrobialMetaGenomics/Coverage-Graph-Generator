@@ -4,6 +4,6 @@
 ### **Breadth of coverage**
    #### the fraction of the genome that is covered by the reads obtained from the sequencing. Reads are aligned on the reference to calculate this.
 ### NOTICE
-#### This code was developed as part of a project carried out during the course of Microbial Metagenomics (Molecular Biology master degree) at the University of Padova. The project was supervised by Prof. Stefano Campanaro, Dr. Esteban Orellana, and Dr. Gabriele Ghiotto. The project was made by Elena Cibola, Maria Agustina Biancalani, Mohamed Khaled, and Mohammed Emam.
+#### This code was developed as part of a project carried out during the course of Microbial Metagenomics (Molecular Biology master degree) at the University of Padova. The project was supervised by Prof. Stefano Campanaro, and Dr. Esteban Orellana. The project was made by Elena Cibola, Maria Agustina Biancalani, Mohamed Khaled, and Mohammed Emam.
 
 ## Introduction 

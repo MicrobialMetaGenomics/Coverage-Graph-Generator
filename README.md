@@ -11,10 +11,16 @@
 
 ## Using CGG 
 ### Input
-###
+#### For the MAGs files generated the sofware uses the fna (fasta nucleic acid) format, this format is slightly different from FASTA as each different sequence in the file are distincted from the other with a title, but both formats uses the FASTA. Using the next line you can change the format of your file but remember that the content and format of the file remain unchanged during the conversion.
+```{python}
+mv input.fasta output.fna
+```
 
 ### Requirements for running the software
-###
+### mmmmmmmmmmmmmmmmm
 
 ### Output
-###
+### mmmmmmmmmmmmmmmmmmmmm
+
+### Circle plot
+### mmmmmmmmmmmmmmmmmmmmm

@@ -16,11 +16,8 @@
 mv input.fasta output.fna
 ```
 
-### Requirements for running the software
-### mmmmmmmmmmmmmmmmm
-
 ### Output
-### mmmmmmmmmmmmmmmmmmmmm
+#### From the first step: the depth file contains multiple columns (Contigs, Position, Sample 1 reads, Sample 2 reads, Sample 3 reads, Sample 4 reads). Secondly, Creation of the pycircos image file that resembles the distribution of the reads across the sequences of the samples represented in circles. Lastly, the table generated that contains the coverage percentages as a _CSV_ file.
 
-### Circle plot
+### Notes about the Circle plot
 ### mmmmmmmmmmmmmmmmmmmmm

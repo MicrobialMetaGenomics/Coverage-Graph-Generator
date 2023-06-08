@@ -26,4 +26,4 @@ mv input.fasta output.fna
 #### From the first step: the depth file contains multiple columns (Contigs, Position, Sample 1 reads, Sample 2 reads, Sample 3 reads, Sample 4 reads). Secondly, Creation of the pycircos image file that resembles the distribution of the reads across the sequences of the samples represented in circles. Lastly, the table generated that contains the coverage percentages as a _CSV_ file that contains multiple columns (MAGs, Associated Contigs, Sample 1 coverage, Sample 2 coverage, Sample 3 coverage, Sample 4 coverage).
 
 ### Limitations
-### The software requires at least 8 GB of RAM which limits its functionality and running time on different PCs, in future updates we would be able to modify the algorithm to enhance its performance.
+#### The software requires at least 8 GB of RAM which limits its functionality and running time on different PCs, in future updates we would be able to modify the algorithm to enhance its performance.

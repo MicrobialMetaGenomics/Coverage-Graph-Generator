@@ -16,6 +16,7 @@ circle_graph_directory = r"(add the path(directory) of circle_graph folder (outp
 
 # Generate csv files and depth files for each MAG file
 fasta_files = [file for file in os.listdir(fasta_directory) if file.endswith('.fna')]
+depth=pd.read_csv(depth_directory,sep="\t")
 
 for fasta_file in fasta_files:
     # MAG file paths
@@ -104,8 +105,7 @@ for fasta_file in fasta_files:
     
     fasta_dict[fasta_file] = contig_names
     
-    coverage_data = {}
-
+coverage_data = {}
 with open(depth_directory, "r") as file:
     reader = csv.reader(file, delimiter="\t")
     next(reader)  
@@ -119,7 +119,7 @@ with open(depth_directory, "r") as file:
         
         coverage_data[contig][position] = samples_coverages
         
-        # Writing the data in the output file
+# Writing the data in the output file
 with open(coverage_table_directory + "\coverage_table.csv", "w", newline='') as file:
     writer = csv.writer(file)
     
@@ -150,7 +150,9 @@ with open(coverage_table_directory + "\coverage_table.csv", "w", newline='') as 
             
 df = pd.read_csv(coverage_table_directory + "\coverage_table.csv")
 df         
-            # Calculate the Average coverage per each MAG per each sample
+
+
+# Calculate the Average coverage per each MAG per each sample
 
 #Group rows by the MAGs and calculate the average coverage of the samples
 grouped_df = df.groupby(df.columns[0]).mean()

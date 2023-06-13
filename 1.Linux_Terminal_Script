@@ -1,0 +1,16 @@
+mkdir MAGs
+mkdir sequences
+cd Project/MAGs/ #use the cd command to get into your MAGs folder
+
+cat *fna > multifna.fna #use the cat comand to concatenate all your MAGs in one file 
+bowtie2-build multifna.fna index
+
+#NOTE: replace the "$threads" with the number of threads suitable for your device.
+#NOTE: you need to add the path of sequences folder with the fastq files.
+for r1 in /"add the path(directory) of the MAGs folder here"/*.fastq; do r2=${r1/_1.fastq/_2.fastq}; n=${r1/*\/}; sample=${n/_1.fastq/}; bowtie2 -q -p $threads -x index -1 $r1 -2 $r2 -S $sample.sam; done
+
+#NOTE: replace the "$threads" with the number of threads suitable for your device.
+#NOTE: you need to add the path of sequences folder which now contains the previously created sam files.
+for f in /"add the path(directory) of the MAGs folder here"/*.sam; do samtools view -@ $threads -b $f | samtools sort -@ $threads > $f.sorted.bam;done
+
+samtools depth -H *sorted.bam > depth.txt

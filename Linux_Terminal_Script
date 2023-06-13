@@ -1,0 +1,6 @@
+cd Project/MAGs/
+cat *fna > multifna.fna 
+bowtie2-build multifna.fna index
+for r1 in /path/to/reads/*.fastq; do r2=${r1/_1.fastq/_2.fastq}; n=${r1/*\/}; sample=${n/_1.fastq/}; bowtie2 -q -p $threads -x index -1 $r1 -2 $r2 -S $sample.sam; done
+for f in /path/to/reads/*.sam; do samtools view -@ $threads -b $f | samtools sort -@ $threads > $f.sorted.bam;done
+samtools depth -H *sorted.bam > depth.txt

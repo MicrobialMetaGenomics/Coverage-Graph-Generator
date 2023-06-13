@@ -8,4 +8,190 @@ from Bio import SeqIO
 import copy
 import numpy as np
 
+#1.Graph Generator 
+fasta_directory = r"add the path(directory) of the MAGs folder here"
+depth_directory = r"add the path(directory) of the depth.txt file here"
+csv_directory = r"add the path(directory) of the mag_csv (intermediate files) folder here"
+circle_graph_directory = r"(add the path(directory) of circle_graph folder (output) here)"
 
+# Generate csv files and depth files for each MAG file
+fasta_files = [file for file in os.listdir(fasta_directory) if file.endswith('.fna')]
+
+for fasta_file in fasta_files:
+    # MAG file paths
+    fasta_path = os.path.join(fasta_directory, fasta_file)
+    csv_file = os.path.join(csv_directory, os.path.splitext(fasta_file)[0] + ".csv")
+    
+    # Creating csv file for the MAG containing (contig, start, end)
+    fasta_sequences = SeqIO.parse(open(fasta_path), 'fasta')
+    with open(csv_file, "w", newline='') as csv_file_obj:
+        writer = csv.writer(csv_file_obj)
+        writer.writerow(['Name', 'Start', 'End'])
+
+        for fasta in fasta_sequences:
+            name, sequence = fasta.id, str(fasta.seq)
+            sequence_length = len(sequence)
+            writer.writerow([name, '1', sequence_length])
+
+    # Read the CSV file to get the contig lengths
+    with open(csv_file) as f:
+        header = next(f)
+        lines = []
+        for line in f:
+            line = line.rstrip().split(",")
+            name = line[0]
+            length = int(line[-1])
+            lines.append((name, length))
+
+    # Sort the lines by length in descending order
+    lines.sort(key=itemgetter(1), reverse=True)
+
+    # Consider only the top 10 lines with the highest length
+    top_10_lines = lines[:10]
+    
+    list_of_contigs = [row[0] for row in top_10_lines]      
+    
+    subset = pd.DataFrame()
+    for contig in list_of_contigs:
+        dftmp = depth[depth[depth.columns[0]]== contig]
+        subset = pd.concat([dftmp,subset])
+        
+    samples = list(subset.columns[2:])    
+
+    max_value = subset.iloc[:,2:].max().max()
+    
+    # Generate circle graph for the MAG file
+    circle = pycircos.Gcircle(figsize=(14, 14))
+    for line in top_10_lines:
+        name, length = line
+        arc = pycircos.Garc(arc_id=name, size=length, interspace=2, raxis_range=(200, 400), label_visible=False)
+        circle.add_garc(arc)
+
+    circle.set_garcs(0, 360)
+    for arc_id in circle.garc_dict:
+        circle.tickplot(arc_id, raxis_range=(200, 400), tickinterval=20000000, ticklabels=None)
+        
+    for cont in list_of_contigs:
+        dftmp = subset[subset["#CHROM"] == cont]
+        x = 420
+        colors = ["g","r","b"]
+        color_idx=0
+        for sample in samples:
+            skewtmp = dftmp[sample].values
+            circle.fillplot(cont, skewtmp, rlim=(0, max_value), base_value=0, raxis_range=(x, x + 150),
+                            facecolor=colors[color_idx], edgecolor=colors[color_idx], linewidth=1)
+            x += 160
+            color_idx+=1
+            if color_idx>len(colors)-1:
+                color_idx=0
+                
+    # Saving the circos plots ad PDFs
+    output_file = os.path.join(circle_graph_directory, os.path.splitext(fasta_file)[0] + ".pdf")
+    circle.save(output_file, "pdf", None)
+
+
+#2.Breadth coverage table
+
+# output directory 
+coverage_table_directory = r"add the path(directory) of the folder weher you want to add the table"
+fasta_dict = {}
+
+for fasta_file in fasta_files:
+       
+    contig_names = []
+    for fasta in fasta_sequences:
+        contig_names.append(fasta.id)
+    
+    fasta_dict[fasta_file] = contig_names
+    
+    coverage_data = {}
+
+with open(depth_directory, "r") as file:
+    reader = csv.reader(file, delimiter="\t")
+    next(reader)  
+    for row in reader:
+        contig = row[0]
+        position = int(row[1])
+        samples_coverages = [int(x) for x in row[2:]]
+                
+        if contig not in coverage_data:
+            coverage_data[contig] = {}
+        
+        coverage_data[contig][position] = samples_coverages
+        
+        # Writing the data in the output file
+with open(coverage_table_directory + "\coverage_table.csv", "w", newline='') as file:
+    writer = csv.writer(file)
+    
+    # Writing the header of the table
+    header = ["MAG", "Contig"]
+    header.extend(["Breadth coverage Sample " + str(i+1) for i in range(len(samples_coverages))])
+    writer.writerow(header)
+    
+    # Writing the data for each contig
+    for mag, contigs in fasta_dict.items():
+        for contig in contigs:
+            row = [mag, contig]
+            breadth_coverages = []
+            
+            if contig in coverage_data:
+                positions = coverage_data[contig].keys()
+                total_positions = len(positions)
+                
+                for i in range(len(samples_coverages)):
+                    covered_positions = sum([1 for pos in positions if coverage_data[contig][pos][i] > 0])
+                    breadth_coverage = covered_positions / total_positions
+                    breadth_coverages.append(breadth_coverage)
+            else:
+                breadth_coverages = [0] * len(samples_coverages)
+            
+            row.extend(breadth_coverages)
+            writer.writerow(row)
+            
+df = pd.read_csv(coverage_table_directory + "\coverage_table.csv")
+df         
+            # Calculate the Average coverage per each MAG per each sample
+
+#Group rows by the MAGs and calculate the average coverage of the samples
+grouped_df = df.groupby(df.columns[0]).mean()
+
+# List to store information about averages less than 0.1
+less_than_0_1 = []
+
+# Print the grouped data
+for index, row in grouped_df.iterrows():
+    print(f"MAG: {index}")
+    for i, column in enumerate(df.columns[2:], start=2):
+        print(f"Average of {column}: {row[column]}")
+        if row[column] < 0.1:
+            less_than_0_1.append((index, column, row[column]))
+
+    print()
+# Print the MAGs samples with averages less than 0.1
+print("MAGs with Average < 10% :")
+for value in less_than_0_1:
+    index, column, avg = value
+    print(f"MAG: {index}, {column}: {avg}")
+   
+# Calculate the percentage of the contigs that have coverage < 10% per each MAG per each sample
+
+#Group rows by the MAGs
+grouped = df.groupby(df.columns[0])
+
+# Initialize a list to store the information for percentages > 50
+greater_than_50_list = []
+
+# Iterate over the groups 
+for group_name, group_data in grouped:
+    print("MAG:", group_name)
+
+    # Calculate the percentage of contigs that have coverage < 0.1 for each samples
+    for idx, column in enumerate(group_data.columns[2:], start=2):
+        # Convert column to numeric data type, ignoring non-numeric values
+        group_data[column] = pd.to_numeric(group_data[column], errors='coerce')
+        percentage = (group_data[column] < 0.1).mean() * 100
+        print("Sample {} ".format(idx-1, idx, column), ("Percentage of contigs that covered by < 10%:", percentage))
+        
+        # Check if the percentage is greater than 50 and add the information to the list
+        if percentage > 50:
+            greater_than_50_list.append((group_name, idx-1, percentage))

@@ -95,6 +95,18 @@ for fasta_file in fasta_files:
 
 # output directory 
 coverage_table_directory = r"add the path(directory) of the folder weher you want to add the table"
+
+for fasta_file in fasta_files:
+    # MAG file paths
+    fasta_path = os.path.join(fasta_directory, fasta_file)
+    csv_file = os.path.join(csv_directory, os.path.splitext(fasta_file)[0] + ".csv")
+    
+    # Creating csv file for the MAG containing (contig, start, end)
+    fasta_sequences = SeqIO.parse(open(fasta_path), 'fasta')
+    with open(csv_file, "w", newline='') as csv_file_obj:
+        writer = csv.writer(csv_file_obj)
+        writer.writerow(['Name', 'Start', 'End'])
+
 fasta_dict = {}
 
 for fasta_file in fasta_files:
